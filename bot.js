@@ -9,6 +9,7 @@ export class Bot {
         this.ws = new WebSocket(url);
         this.isReady = false;
         this.currentTokenInProcess = null;
+        this.sellTimeout = null;
         this.inProcess = false;
         this.web3Connection = new Connection(
             process.env.RPC_ENDPOINT,
@@ -38,6 +39,11 @@ export class Bot {
         console.log("NEW TICK ", this.inProcess);
         if(this.inProcess){
             const successSell = await this.sell(this.inProcess.mint, this.inProcess.amount);
+            if (this.sellTimeout) {
+                clearTimeout(this.sellTimeout);
+                this.sellTimeout = null;
+            }
+
             if(successSell) {
                 this.inProcess = null;
             }
@@ -48,7 +54,7 @@ export class Bot {
         const successBuy = await this.buy(mint, amount);
         console.log("BUY", successBuy)
 
-        setTimeout(async()=>{
+        this.sellTimeout = setTimeout(async()=>{
             if(successBuy && !this.inProcess){
                 this.inProcess = {mint, amount};
                 const successSell = await this.sell(mint, amount);
@@ -57,7 +63,7 @@ export class Bot {
                 }
                 console.log("SELL", successSell)
             }
-        }, 1500)
+        }, 5000)
     }
 
     setHandler(methodName) {
@@ -107,8 +113,8 @@ export class Bot {
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
-                "slippage": 90,                  // percent slippage allowed
-                "priorityFee": 0.000005,         // priority fee
+                "slippage": 100,                  // percent slippage allowed
+                "priorityFee": 0.00005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
         });
