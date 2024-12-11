@@ -1,0 +1,21 @@
+{
+  "name": "testpump",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@solana/web3.js": "^1.95.8",
+    "bignumber.js": "^9.1.2",
+    "bs58": "^6.0.0",
+    "pm2": "^5.4.3",
+    "throttle-debounce": "^5.0.2",
+    "ws": "^8.18.0"
+  }
+}
