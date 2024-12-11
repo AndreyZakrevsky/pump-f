@@ -23,7 +23,7 @@ export class Bot {
 
         this.ws.onopen = () => {
             //console.log("Connection opened");
-            //this.tokenCreationListening();
+            this.tokenCreationListening();
             //this.accountTradingListening();
         };
 
@@ -177,13 +177,5 @@ export class Bot {
         const {mint, name, txType } = this.currentTokenInProcess;
 
         //this.throttledTrade(mint, 25000);
-        // console.log("DDDDDDDD ",this.currentTokenInProcess)
-        // if(txType === 'buy'){
-        //     this.throttledTrade(mint, 0.001);
-        // }
-
-        //if(!name || name !== name.toUpperCase()) return; // filter uppercase name
-
-       // this.throttledTrade(mint, 0.001);
     }
 }
