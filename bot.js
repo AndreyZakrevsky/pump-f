@@ -114,7 +114,7 @@ export class Bot {
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
                 "slippage": 100,                  // percent slippage allowed
-                "priorityFee": 0.00005,         // priority fee
+                "priorityFee": 0.0005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
         });
