@@ -4,11 +4,6 @@ import { VersionedTransaction, Connection, Keypair } from '@solana/web3.js';
 import bs58 from "bs58";
 
 
-// const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
-// const SOLANA_PK = '4bjWNv8BoGpGt3x5dGBjNBSAK17ZF8GdpdAmhQKj6EXvYDNH43tLQmePe7KYvbiCdPmzzMePbrBkVhoGdhM7fQNx'
-// const myPublicKey = '3vYLTM7mwmxAj1frW957FVNUDkc1cpLsLtHDCwnECZDe'
-
-
 export class Bot {
     constructor(url) {
         this.ws = new WebSocket(url);
@@ -16,7 +11,7 @@ export class Bot {
         this.currentTokenInProcess = null;
         this.inProcess = false;
         this.web3Connection = new Connection(
-            RPC_ENDPOINT,
+            process.env.RPC_ENDPOINT,
             'confirmed',
         );
         console.log("STARTTTTTTTTTT")
@@ -115,7 +110,7 @@ export class Bot {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "publicKey": myPublicKey,  // Your wallet public key
+                "publicKey": process.env.PUBLIC_KEY,  // Your wallet public key
                 "action": "buy",                 // "buy" or "sell"
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
@@ -140,7 +135,7 @@ export class Bot {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                "publicKey": myPublicKey,  // Your wallet public key
+                "publicKey": process.env.PUBLIC_KEY,  // Your wallet public key
                 "action": "sell",                 // "buy" or "sell"
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
@@ -161,7 +156,7 @@ export class Bot {
         if(response.status === 200) {
             const data = await response.arrayBuffer();
             const tx = VersionedTransaction.deserialize(new Uint8Array(data));
-            const signerKeyPair = Keypair.fromSecretKey(bs58.decode(SOLANA_PK));
+            const signerKeyPair = Keypair.fromSecretKey(bs58.decode(process.env.SOLANA_PRIVATE_KEY));
 
             tx.sign([signerKeyPair]);
             await this.web3Connection.sendTransaction(tx)
@@ -174,9 +169,8 @@ export class Bot {
 
     defaultHandler(event) {
         this.currentTokenInProcess = JSON.parse(event.data);
-        const {mint, name, txType } = this.currentTokenInProcess;
+        const {mint } = this.currentTokenInProcess;
 
-        console.log(process.env.RPC_ENDPOINT);
-        //this.throttledTrade(mint, 25000);
+        this.throttledTrade(mint, 25000);
     }
 }
