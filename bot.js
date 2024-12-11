@@ -113,7 +113,7 @@ export class Bot {
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
-                "slippage": 100,                  // percent slippage allowed
+                "slippage": 20,                  // percent slippage allowed
                 "priorityFee": 0.005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
