@@ -18,6 +18,7 @@ export class Bot {
 
         this.ws.onopen = () => {
             //console.log("Connection opened");
+            console.clear();
             this.tokenCreationListening();
             //this.accountTradingListening();
         };
@@ -32,7 +33,7 @@ export class Bot {
         };
 
         this.ws.onmessage = this.defaultHandler.bind(this);
-        this.throttledTrade = throttle(10000, this.trade);
+        this.throttledTrade = throttle(12000, this.trade);
     }
 
     async trade(mint, amount) {
@@ -63,7 +64,7 @@ export class Bot {
                 }
                 console.log("SELL", successSell)
             }
-        }, 5000)
+        }, 10000)
     }
 
     setHandler(methodName) {
@@ -99,7 +100,7 @@ export class Bot {
     }
 
     async buy(mint, amount) {
-        const start = process.hrtime();
+       const start = process.hrtime();
 
        try {
         const response = await fetch(`https://pumpportal.fun/api/trade-local`, {
@@ -114,14 +115,14 @@ export class Bot {
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
                 "slippage": 20,                  // percent slippage allowed
-                "priorityFee": 0.005,         // priority fee
+                "priorityFee": 0.000005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
         });
+
         const diff = process.hrtime(start); 
-        const responseTime = (diff[0] * 1e9 + diff[1]) / 1e6; // Convert to milliseconds
-        
-        console.log(`Response time of BUY: ${responseTime.toFixed(3)} ms`);
+        const responseTime = (diff[0] * 1e9 + diff[1]) / 1e6;
+        console.log(`BUY TIME pumpportal.fun: ${responseTime.toFixed(3)} ms`);
 
         return await this.handleResponse(response);
        } catch (error) {
@@ -130,6 +131,7 @@ export class Bot {
     }
 
     async sell(mint, amount) {
+       const start = process.hrtime();
        try {
         const response = await fetch(`https://pumpportal.fun/api/trade-local`, {
             method: "POST",
@@ -148,6 +150,10 @@ export class Bot {
             })
         });
 
+        const diff = process.hrtime(start); 
+        const responseTime = (diff[0] * 1e9 + diff[1]) / 1e6;
+        console.log(`SELL TIME pumpportal.fun: ${responseTime.toFixed(3)} ms`);
+
         return await this.handleResponse(response);
        } catch (error) {
           return Promise.resolve(false); 
@@ -156,12 +162,17 @@ export class Bot {
 
     async handleResponse(response){
         if(response.status === 200) {
+            const start = process.hrtime();
             const data = await response.arrayBuffer();
             const tx = VersionedTransaction.deserialize(new Uint8Array(data));
             const signerKeyPair = Keypair.fromSecretKey(bs58.decode(process.env.SOLANA_PRIVATE_KEY));
 
             tx.sign([signerKeyPair]);
-            await this.web3Connection.sendTransaction(tx)
+            await this.web3Connection.sendTransaction(tx);
+
+            const diff = process.hrtime(start); 
+            const responseTime = (diff[0] * 1e9 + diff[1]) / 1e6;
+            console.log(`CONFIRM TIME web3Connection: ${responseTime.toFixed(3)} ms`);
 
             return Promise.resolve(true); 
         } else {
@@ -171,7 +182,7 @@ export class Bot {
 
     defaultHandler(event) {
         this.currentTokenInProcess = JSON.parse(event.data);
-        const {mint } = this.currentTokenInProcess;
+        const { mint } = this.currentTokenInProcess;
 
         this.throttledTrade(mint, 25000);
     }
