@@ -4,9 +4,9 @@ import { VersionedTransaction, Connection, Keypair } from '@solana/web3.js';
 import bs58 from "bs58";
 
 
-const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
-const SOLANA_PK = '4bjWNv8BoGpGt3x5dGBjNBSAK17ZF8GdpdAmhQKj6EXvYDNH43tLQmePe7KYvbiCdPmzzMePbrBkVhoGdhM7fQNx'
-const myPublicKey = '3vYLTM7mwmxAj1frW957FVNUDkc1cpLsLtHDCwnECZDe'
+// const RPC_ENDPOINT = "https://api.mainnet-beta.solana.com";
+// const SOLANA_PK = '4bjWNv8BoGpGt3x5dGBjNBSAK17ZF8GdpdAmhQKj6EXvYDNH43tLQmePe7KYvbiCdPmzzMePbrBkVhoGdhM7fQNx'
+// const myPublicKey = '3vYLTM7mwmxAj1frW957FVNUDkc1cpLsLtHDCwnECZDe'
 
 
 export class Bot {
@@ -176,6 +176,7 @@ export class Bot {
         this.currentTokenInProcess = JSON.parse(event.data);
         const {mint, name, txType } = this.currentTokenInProcess;
 
+        console.log(process.env.RPC_ENDPOINT);
         //this.throttledTrade(mint, 25000);
     }
 }
