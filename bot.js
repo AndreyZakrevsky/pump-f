@@ -14,7 +14,6 @@ export class Bot {
             process.env.RPC_ENDPOINT,
             'confirmed',
         );
-        console.log("STARTTTTTTTTTT")
 
         this.ws.onopen = () => {
             //console.log("Connection opened");
@@ -49,14 +48,6 @@ export class Bot {
         const successBuy = await this.buy(mint, amount);
         console.log("BUY", successBuy)
 
-        // if(successBuy && !this.inProcess){
-        //     this.inProcess = {mint, amount};
-        //     const successSell = await this.sell(mint, amount);
-        //     if(successSell) {
-        //         this.inProcess = null;
-        //     }
-        //     console.log("SELL", successSell)
-        // }
         setTimeout(async()=>{
             if(successBuy && !this.inProcess){
                 this.inProcess = {mint, amount};
@@ -102,6 +93,7 @@ export class Bot {
     }
 
     async buy(mint, amount) {
+        const start = process.hrtime();
 
        try {
         const response = await fetch(`https://pumpportal.fun/api/trade-local`, {
@@ -115,11 +107,15 @@ export class Bot {
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
-                "slippage": 1,                  // percent slippage allowed
+                "slippage": 90,                  // percent slippage allowed
                 "priorityFee": 0.000005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
         });
+        const diff = process.hrtime(start); 
+        const responseTime = (diff[0] * 1e9 + diff[1]) / 1e6; // Convert to milliseconds
+        
+        console.log(`Response time of BUY: ${responseTime.toFixed(3)} ms`);
 
         return await this.handleResponse(response);
        } catch (error) {
