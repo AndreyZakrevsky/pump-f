@@ -44,9 +44,9 @@ export class Bot {
         }
     }
 
-    async trade(mint, amount) {
+    async trade(mint, amount, name) {
         console.log("NEW TICK ", this.inProcess);
-        if(this.inProcess ){
+        if(this.inProcess) {
             const successSell = await this.sell(this.inProcess.mint, this.inProcess.amount);
             this.sellRetryCounter += 1;
             this.clearTimeOut();
@@ -61,7 +61,7 @@ export class Bot {
         this.sellTimeout = setTimeout(async()=>{
             this.clearTimeOut();
             if(successBuy && !this.inProcess){
-                this.inProcess = {mint, amount};
+                this.inProcess = {mint, amount, name};
                 const successSell = await this.sell(mint, amount);
                 if(successSell) {
                     this.inProcess = null;
@@ -187,8 +187,8 @@ export class Bot {
 
     defaultHandler(event) {
         this.currentTokenInProcess = JSON.parse(event.data);
-        const { mint } = this.currentTokenInProcess;
+        const { mint, symbol } = this.currentTokenInProcess;
 
-        this.throttledTrade(mint, 25000);
+        this.throttledTrade(mint, 25000, symbol);
     }
 }
