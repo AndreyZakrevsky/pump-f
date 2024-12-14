@@ -10,22 +10,16 @@ export class Bot {
         this.isReady = false;
         this.currentTokenInProcess = null;
         this.sellTimeout = null;
-        this.inProcess = false;
+        this.inProcess = null;
+        this.sellRetryCounter = 0;
         this.web3Connection = new Connection(
             process.env.RPC_ENDPOINT,
             'confirmed',
         );
 
         this.ws.onopen = () => {
-            //console.log("Connection opened");
-            console.clear();
             this.tokenCreationListening();
             //this.accountTradingListening();
-        };
-
-        this.ws.onclose = () => {
-            this.isReady = false;
-            console.log("Connection closed");
         };
 
         this.ws.onerror = (error) => {
@@ -33,22 +27,31 @@ export class Bot {
         };
 
         this.ws.onmessage = this.defaultHandler.bind(this);
-        this.throttledTrade = throttle(12000, this.trade);
+        this.throttledTrade = throttle(7000, this.trade);
+    }
+
+    clearTimeOut(){
+        if (this.sellTimeout) {
+            clearTimeout(this.sellTimeout);
+            this.sellTimeout = null;
+        }
+    }
+
+    clearRetry(status){
+        if(status || this.sellRetryCounter > 5) {
+            this.sellRetryCounter = 0;
+            this.inProcess = null;
+        }
     }
 
     async trade(mint, amount) {
         console.log("NEW TICK ", this.inProcess);
-        if(this.inProcess){
+        if(this.inProcess ){
             const successSell = await this.sell(this.inProcess.mint, this.inProcess.amount);
-            if (this.sellTimeout) {
-                clearTimeout(this.sellTimeout);
-                this.sellTimeout = null;
-            }
-
-            if(successSell) {
-                this.inProcess = null;
-            }
-            console.log("SELL", successSell)
+            this.sellRetryCounter += 1;
+            this.clearTimeOut();
+            this.clearRetry(successSell);
+            console.log("SELL", successSell);
             return;
         }
 
@@ -56,6 +59,7 @@ export class Bot {
         console.log("BUY", successBuy)
 
         this.sellTimeout = setTimeout(async()=>{
+            this.clearTimeOut();
             if(successBuy && !this.inProcess){
                 this.inProcess = {mint, amount};
                 const successSell = await this.sell(mint, amount);
@@ -64,7 +68,7 @@ export class Bot {
                 }
                 console.log("SELL", successSell)
             }
-        }, 10000)
+        }, 2000)
     }
 
     setHandler(methodName) {
@@ -115,9 +119,10 @@ export class Bot {
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
                 "slippage": 1,                  // percent slippage allowed
-                "priorityFee": 0.000005,         // priority fee
+                "priorityFee": 0.00005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
-            })
+            }),
+            signal: AbortSignal.timeout(250)
         });
 
         const diff = process.hrtime(start); 
@@ -144,8 +149,8 @@ export class Bot {
                 "mint": mint,         // contract address of the token you want to trade
                 "denominatedInSol": "false",     // "true" if amount is amount of SOL, "false" if amount is number of tokens
                 "amount": amount,                  // amount of SOL or tokens
-                "slippage": 1,                  // percent slippage allowed
-                "priorityFee": 0.000005,        // priority fee
+                "slippage": 20,                  // percent slippage allowed
+                "priorityFee": 0.00005,        // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             })
         });
