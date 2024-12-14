@@ -122,7 +122,7 @@ export class Bot {
                 "priorityFee": 0.00005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             }),
-            signal: AbortSignal.timeout(250)
+            signal: AbortSignal.timeout(350)
         });
 
         const diff = process.hrtime(start); 
