@@ -190,7 +190,9 @@ export class Bot {
         const { mint, symbol, txType } = this.currentTokenInProcess;
         // console.log(this.currentTokenInProcess)
         if(txType === 'buy'){
-            this.throttledTrade(mint, 25000, "TEST");
+            this.throttledTrade(mint, 250000, "TEST");
+        } else if ( this.inProcess?.mint === mint ){
+            this.throttledTrade(mint, 250000, "TEST");
         }
     }
 }
