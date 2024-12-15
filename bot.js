@@ -38,7 +38,7 @@ export class Bot {
     }
 
     clearRetry(status){
-        if(status || this.sellRetryCounter > 5) {
+        if(status || this.sellRetryCounter > 3) {
             this.sellRetryCounter = 0;
             this.inProcess = null;
         }
