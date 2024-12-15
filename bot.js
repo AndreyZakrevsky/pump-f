@@ -18,8 +18,8 @@ export class Bot {
         );
 
         this.ws.onopen = () => {
-            this.tokenCreationListening();
-            //this.accountTradingListening();
+            //this.tokenCreationListening();
+            this.accountTradingListening(["orcACRJYTFjTeo2pV8TfYRTpmqfoYgbVi9GeANXTCc8"]);
         };
 
         this.ws.onerror = (error) => {
@@ -68,7 +68,7 @@ export class Bot {
                 }
                 console.log("SELL", successSell)
             }
-        }, 2000)
+        }, 3000)
     }
 
     setHandler(methodName) {
@@ -91,10 +91,10 @@ export class Bot {
         }
     }
 
-    accountTradingListening() {
+    accountTradingListening(tokens) {
         const payload = {
             method: "subscribeAccountTrade",
-            keys: ["orcACRJYTFjTeo2pV8TfYRTpmqfoYgbVi9GeANXTCc8"]
+            keys: tokens
         };
         if (this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(payload));
@@ -122,7 +122,7 @@ export class Bot {
                 "priorityFee": 0.00005,         // priority fee
                 "pool": "pump"                   // exchange to trade on. "pump" or "raydium"
             }),
-            signal: AbortSignal.timeout(350)
+            signal: AbortSignal.timeout(450)
         });
 
         const diff = process.hrtime(start); 
@@ -187,8 +187,10 @@ export class Bot {
 
     defaultHandler(event) {
         this.currentTokenInProcess = JSON.parse(event.data);
-        const { mint, symbol } = this.currentTokenInProcess;
-
-        this.throttledTrade(mint, 25000, symbol);
+        const { mint, symbol, txType } = this.currentTokenInProcess;
+        // console.log(this.currentTokenInProcess)
+        if(txType === 'buy'){
+            this.throttledTrade(mint, 25000, "TEST");
+        }
     }
 }
